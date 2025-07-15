@@ -3,9 +3,12 @@ package com.example.studygroup.Service;
 import com.example.studygroup.DTO.BoardDto;
 import com.example.studygroup.DTO.BoardRequestDto;
 import com.example.studygroup.Entitiy.Board;
+import com.example.studygroup.Entitiy.Category;
 import com.example.studygroup.Entitiy.Users;
 import com.example.studygroup.Repository.BoardRepository;
+import com.example.studygroup.Repository.CategoryRepository;
 import com.example.studygroup.Repository.UserRepository;
+import com.example.studygroup.exception.CategoryNotFoundException;
 import com.example.studygroup.exception.UserNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -24,22 +27,19 @@ public class BoardService {
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
     }
-    private final UserRepository userRepository;
 
-    public BoardService(BoardRepository boardRepository, UserRepository userRepository) {
-        this.boardRepository = boardRepository;
-        this.userRepository = userRepository;
-    }
 
     @Transactional
     public BoardDto create(Long userId, BoardRequestDto req) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+        Category category = categoryRepository.findByName(req.getCategory())
+                .orElseThrow(() -> new CategoryNotFoundException(req.getCategory()));
         Board board = Board.builder()
                 .title(req.getTitle())
                 .content(req.getContent())
                 .status(req.getStatus())
-                .category(req.getCategory())
+                .category(category)
                 .user(user)
                 .build();
         boardRepository.save(board);

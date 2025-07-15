@@ -31,7 +31,7 @@ public class StudyPlanRepository {
 
     public List<StudyPlan> findByUserId(Long userId) {
         return em.createQuery(
-                        "SELECT sp FROM StudyPlan sp WHERE sp.user.id = :uid ORDER BY sp.startDate", StudyPlan.class
+                        "SELECT sp FROM StudyPlan sp WHERE sp.users.id = :uid ORDER BY sp.startDate", StudyPlan.class
                 )
                 .setParameter("uid", userId)
                 .getResultList();
