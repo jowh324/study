@@ -36,19 +36,18 @@ public class StudyPlan {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    @Column(name= "user_id")
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Users users;
+    private Users user;
 
     @Builder
-    public StudyPlan(String title, String description, LocalDate startDate, LocalDate endDate, Users users,boolean isComplete, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public StudyPlan(String title, String description, LocalDate startDate, LocalDate endDate, Users user,boolean isComplete, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.title = title;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.users = users;
+        this.user = user;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.isComplete = isComplete;

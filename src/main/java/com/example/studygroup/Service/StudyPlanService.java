@@ -33,7 +33,7 @@ public class StudyPlanService {
                 .startDate(req.getStartDate())
                 .endDate(req.getEndDate())
                 .isComplete(req.getIsComplete())
-                .users(user)
+                .user(user)
                 .build();
         planRepository.save(sp);
         return toDto(sp);
