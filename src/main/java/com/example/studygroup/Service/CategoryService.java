@@ -22,7 +22,6 @@ public class CategoryService {
     public CategoryDto create(CategoryRequestDto req) {
         Category category = Category.builder()
                 .name(req.getName())
-                .type(req.getType())
                 .build();
         categoryRepository.save(category);
         return toDto(category);
@@ -41,6 +40,6 @@ public class CategoryService {
     }
 
     private CategoryDto toDto(Category c) {
-        return new CategoryDto(c.getId(), c.getName(), c.getType());
+        return new CategoryDto(c.getId(), c.getName());
     }
 }

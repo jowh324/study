@@ -11,11 +11,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // Enable simple in-memory broker at /topic and enable user-specific queues at /user
         config.enableSimpleBroker("/topic", "/user");
-        // Prefix for messages bound for @MessageMapping
         config.setApplicationDestinationPrefixes("/app");
-        // Prefix for user destination (e.g., /user/{username}/queue)
         config.setUserDestinationPrefix("/user");
     }
 

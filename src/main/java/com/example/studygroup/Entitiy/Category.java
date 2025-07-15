@@ -22,17 +22,14 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CategoryType type;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Board> boards = new HashSet<>();
 
     @Builder
-    public Category(String name, CategoryType type) {
+    public Category(String name) {
         this.name = name;
-        this.type = type;
+
     }
 }
 
