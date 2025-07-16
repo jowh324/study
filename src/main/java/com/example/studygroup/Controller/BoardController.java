@@ -55,8 +55,12 @@ public class BoardController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBoard(@PathVariable Long id) {
-        boardService.delete(id);
+    public ResponseEntity<Void> deleteBoard(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails // userDetails 추가
+    ) {
+        Long currentUserId = userDetails.getUserId(); // userId 가져오기
+        boardService.delete(id, currentUserId); // 서비스에 두 ID 모두 전달
         return ResponseEntity.noContent().build();
     }
 }

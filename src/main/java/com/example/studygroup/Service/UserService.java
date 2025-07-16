@@ -28,7 +28,7 @@ public class UserService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already in use");
         }
-        
+
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         Users user = Users.builder()
@@ -41,5 +41,12 @@ public class UserService {
         return new SignupResponseDto(user.getId(), user.getEmail(), user.getName());
     }
 
-
+    @Transactional
+    public void deleteUser(Long id) {
+        // 사용자가 존재하는지 확인 후 삭제합니다.
+        if (!userRepository.existsById(id)) { // existsById 같은 메소드가 Repository에 있다고 가정
+            throw new UserNotFoundException(id);
+        }
+        userRepository.deleteById(id);
+    }
 }

@@ -10,6 +10,7 @@ import com.example.studygroup.Repository.CategoryRepository;
 import com.example.studygroup.Repository.UserRepository;
 import com.example.studygroup.exception.CategoryNotFoundException;
 import com.example.studygroup.exception.UserNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -68,10 +69,17 @@ public class BoardService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        boardRepository.deleteById(id);
-    }
+    public void delete(Long boardId, Long currentUserId) { // 메소드에 userId 파라미터 추가
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new EntityNotFoundException("Board not found"));
 
+        // 게시글의 작성자 ID와 현재 로그인한 사용자의 ID가 같은지 확인
+        if (!board.getUser().getId().equals(currentUserId)) {
+            throw new IllegalStateException("You do not have permission to delete this board."); // 권한 없음 예외 발생
+        }
+
+        boardRepository.deleteById(boardId);
+    }
     private BoardDto toDto(Board b) {
         return new BoardDto(
                 b.getId(),
