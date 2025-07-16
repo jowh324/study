@@ -23,47 +23,59 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
+
+
+    public SecurityConfig(CustomUserDetailsService uds) {
+        this.userDetailsService = uds;
+    }
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    private final PasswordEncoder passwordEncoder;
-
-    public SecurityConfig(CustomUserDetailsService uds, PasswordEncoder pe) {
-        this.userDetailsService = uds;
-        this.passwordEncoder    = pe;
-    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
 
-            .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/users/signup", "/api/users/login").permitAll()  // 회원가입, 로그인은 허용
-                        .anyRequest().authenticated()  // 나머지는 인증 필요
+                        // 회원가입과 로그인은 인증 없이 접근 허용
+                        .requestMatchers("/api/users/signup", "/api/users/login").permitAll()
+                        // 나머지 모든 요청은 인증 필요
+                        .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
-                        .loginPage("/api/users/login")  // 커스텀 로그인 페이지
-                        .defaultSuccessUrl("/home", true)
+                        // Spring Security가 로그인 요청을 처리할 URL
+                        .loginProcessingUrl("/api/users/login")
+                        // 로그인 ID로 사용할 파라미터 이름
+                        .usernameParameter("email")
+                        // 로그인 성공 시 핸들러
+                        .successHandler((request, response, authentication) -> {
+                            response.setStatus(200);
+                            response.getWriter().write("Login Successful");
+                        })
+                        // 로그인 실패 시 핸들러
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(401);
+                            response.getWriter().write("Login Failed: " + exception.getMessage());
+                        })
                         .permitAll()
                 )
                 .logout((logout) -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
-                        .permitAll()
+                        .logoutUrl("/api/users/logout")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(200);
+                            response.getWriter().write("Logout Successful");
+                        })
                 );
 
         return http.build();
     }
 
-    // DAO 인증 프로바이더를 빈으로 등록
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder);
+        provider.setPasswordEncoder(passwordEncoder()); // Bean으로 등록된 passwordEncoder() 사용
         return provider;
     }
 

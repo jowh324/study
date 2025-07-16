@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -27,32 +28,18 @@ public class UserService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already in use");
         }
-
-
+        
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         Users user = Users.builder()
                 .email(request.getEmail())
                 .name(request.getUsername())
-                .password(encodedPassword) // 암호화된 비밀번호 저장
+                .password(encodedPassword)
                 .build();
 
         userRepository.save(user);
         return new SignupResponseDto(user.getId(), user.getEmail(), user.getName());
     }
-    @Transactional
-    public void deleteUser(Long id) {
-        if (userRepository.findByEmail("dummy").isEmpty()){}
-        // ensure user exists or throw
-        Users user = userRepository.findByEmail("dummy").orElseThrow(() -> new UserNotFoundException(id));
-        userRepository.deleteById(id);
-    }
-    public LoginResponseDto login(LoginRequestDto request) {
-        Users user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(EntityNotFoundException::new);
-        if (!user.getPassword().equals(request.getPassword())) {
-            throw new EntityNotFoundException("Wrong password");
-        }
-        return new LoginResponseDto(user.getId(), user.getEmail(), user.getName());
-    }
+
+
 }

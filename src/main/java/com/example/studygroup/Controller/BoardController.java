@@ -3,6 +3,7 @@ package com.example.studygroup.Controller;
 import com.example.studygroup.DTO.BoardDto;
 import com.example.studygroup.DTO.BoardRequestDto;
 import com.example.studygroup.Service.BoardService;
+import com.example.studygroup.Service.CustomUserDetails;
 import com.example.studygroup.Service.CustomUserDetailsService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -21,15 +22,14 @@ public class BoardController {
         this.boardService = boardService;
     }
 
-    @AuthenticationPrincipal
 
     @PostMapping
     public ResponseEntity<BoardDto> createBoard(
-            @AuthenticationPrincipal CustomUserDetailsService userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails, // <-- 이렇게 변경
             @Valid @RequestBody BoardRequestDto request
     ) {
-        // userDetails 객체에서 사용자 ID를 안전하게 가져옴
-        Long currentUserId = userDetails.; // CustomUserDetails에 getId() 같은 메소드가 있다고 가정
+        // userDetails 객체에서 사용자 ID를 안전하게 가져옵니다.
+        Long currentUserId = userDetails.getUserId();
 
         BoardDto dto = boardService.create(currentUserId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
