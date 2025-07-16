@@ -41,16 +41,23 @@ public class StudyPlanController {
 
     @PutMapping("/{id}")
     public ResponseEntity<StudyPlanDto> updatePlan(
-            @PathVariable Long id,
+            @PathVariable Long id, // 1. 수정할 계획의 ID
+            @AuthenticationPrincipal CustomUserDetails userDetails, // 2. 로그인한 사용자 정보
             @Valid @RequestBody StudyPlanRequestDto request
     ) {
-        StudyPlanDto dto = planService.update(id, request);
+        Long currentUserId = userDetails.getUserId();
+        StudyPlanDto dto = planService.update(id, currentUserId, request);
         return ResponseEntity.ok(dto);
     }
 
+    // --- 수정된 deletePlan 메소드 ---
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePlan(@PathVariable Long id) {
-        planService.delete(id);
+    public ResponseEntity<Void> deletePlan(
+            @PathVariable Long id, // 1. 삭제할 계획의 ID
+            @AuthenticationPrincipal CustomUserDetails userDetails // 2. 로그인한 사용자 정보
+    ) {
+        Long currentUserId = userDetails.getUserId();
+        planService.delete(id, currentUserId);
         return ResponseEntity.noContent().build();
     }
 }

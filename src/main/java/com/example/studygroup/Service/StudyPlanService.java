@@ -6,7 +6,9 @@ import com.example.studygroup.Entitiy.StudyPlan;
 import com.example.studygroup.Entitiy.Users;
 import com.example.studygroup.Repository.StudyPlanRepository;
 import com.example.studygroup.Repository.UserRepository;
+import com.example.studygroup.exception.UnauthorizedException;
 import com.example.studygroup.exception.UserNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,21 +49,36 @@ public class StudyPlanService {
     }
 
     @Transactional
-    public StudyPlanDto update(Long id, StudyPlanRequestDto req) {
-        StudyPlan sp = planRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+    public StudyPlanDto update(Long planId, Long currentUserId, StudyPlanRequestDto req) {
+        StudyPlan sp = planRepository.findById(planId)
+                .orElseThrow(() -> new EntityNotFoundException("Plan not found"));
+
+        // 계획의 소유자 ID와 현재 로그인한 사용자 ID가 같은지 확인
+        if (!sp.getUser().getId().equals(currentUserId)) {
+            throw new UnauthorizedException("You can only update your own plans.");
+        }
+
         sp.setTitle(req.getTitle());
         sp.setDescription(req.getDescription());
         sp.setStartDate(req.getStartDate());
         sp.setEndDate(req.getEndDate());
         sp.setIsComplete(req.getIsComplete());
-        StudyPlan updated = planRepository.update(sp);
-        return toDto(updated);
+        StudyPlan updatedPlan = planRepository.save(sp);
+
+        return toDto(updatedPlan);
     }
 
     @Transactional
-    public void delete(Long id) {
-        planRepository.deleteById(id);
+    public void delete(Long planId, Long currentUserId) {
+        StudyPlan sp = planRepository.findById(planId)
+                .orElseThrow(() -> new EntityNotFoundException("Plan not found"));
+
+        // 삭제 권한 확인
+        if (!sp.getUser().getId().equals(currentUserId)) {
+            throw new UnauthorizedException("You can only delete your own plans.");
+        }
+
+        planRepository.deleteById(planId);
     }
 
     private StudyPlanDto toDto(StudyPlan sp) {

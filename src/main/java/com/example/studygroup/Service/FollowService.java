@@ -26,14 +26,18 @@ public class FollowService {
 
     @Transactional
     public FollowDto follow(FollowRequestDto req) {
+        FollowId followId = new FollowId(req.getFollowerId(), req.getFolloweeId());
+        if (followRepository.findById(followId).isPresent()) {
+            throw new IllegalStateException("You are already following this user.");
+        }
         Users follower = userRepository.findById(req.getFollowerId())
                 .orElseThrow(() -> new UserNotFoundException(req.getFollowerId()));
         Users followee = userRepository.findById(req.getFolloweeId())
                 .orElseThrow(() -> new UserNotFoundException(req.getFolloweeId()));
-        Follow follow = Follow.builder()
-                .follower(follower)
-                .followee(followee)
-                .build();
+
+        Follow follow = new Follow(follower, followee);
+
+
         followRepository.save(follow);
         return new FollowDto(follower.getName(), followee.getName(), follow.getFollowedAt());
     }

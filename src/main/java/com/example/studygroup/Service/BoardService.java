@@ -34,15 +34,20 @@ public class BoardService {
     public BoardDto create(Long userId, BoardRequestDto req) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        Category category = categoryRepository.findByName(req.getCategory())
-                .orElseThrow(() -> new CategoryNotFoundException(req.getCategory()));
-        Board board = Board.builder()
-                .title(req.getTitle())
-                .content(req.getContent())
-                .status(req.getStatus())
-                .category(category)
-                .user(user)
-                .build();
+
+        String categoryName = req.getCategory().trim();
+        Category category = categoryRepository.findByName(categoryName)
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found: " + categoryName));
+
+        Board board = new Board(
+                req.getTitle(),
+                req.getContent(),
+                req.getStatus(),
+                category,
+                user
+        );
+
+
         boardRepository.save(board);
         return toDto(board);
     }

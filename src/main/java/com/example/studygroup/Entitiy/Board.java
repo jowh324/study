@@ -7,14 +7,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Builder
 @Table(name = "board")
+@EntityListeners(AuditingEntityListener.class)
 public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,27 +36,25 @@ public class Board {
 
     @Column(nullable = false)
     private String status;
-
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
+    @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    @Column(name="user_id",insertable = false, updatable = false)
-    private Long user_id;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @Builder
-    public Board(String title, Category category, String content, String status, Long user_id) {
+
+    public Board(String title, String content, String status, Category category, Users user) {
         this.title = title;
-        this.category = category;
         this.content = content;
         this.status = status;
-        this.user_id = user_id;
-        this.createdAt = LocalDateTime.now();
+        this.category = category;
+        this.user = user;
     }
 }
 

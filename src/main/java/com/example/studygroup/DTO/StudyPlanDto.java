@@ -1,8 +1,12 @@
 package com.example.studygroup.DTO;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Getter
 public class StudyPlanDto {
     private Long id;
     private String title;
@@ -25,5 +29,5 @@ public class StudyPlanDto {
         this.isComplete = isComplete;
         this.createdAt = createdAt;
     }
-    // getters and setters omitted for brevity
+
 }

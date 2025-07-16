@@ -38,7 +38,6 @@ public class FollowController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody FollowRequestDto request
     ) {
-        // 여기도 마찬가지로 인증된 사용자의 ID를 사용합니다.
         Long followerId = userDetails.getUserId();
         request.setFollowerId(followerId);
 

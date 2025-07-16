@@ -30,11 +30,10 @@ public class Follow {
     @CreationTimestamp
     @Column(name = "followed_at", nullable = false, updatable = false)
     private LocalDateTime followedAt;
-
-    // id assignment removed; JPA handles composite key
     public Follow(Users follower, Users followee) {
         this.follower = follower;
         this.followee = followee;
-        this.id = new FollowId(); // placeholder; populated by JPA
+        this.id = new FollowId(follower.getId(), followee.getId());
     }
+
 }
