@@ -2,10 +2,12 @@ package com.example.studygroup.Controller;
 
 import com.example.studygroup.DTO.StudyPlanDto;
 import com.example.studygroup.DTO.StudyPlanRequestDto;
+import com.example.studygroup.Service.CustomUserDetails;
 import com.example.studygroup.Service.StudyPlanService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,16 +23,20 @@ public class StudyPlanController {
 
     @PostMapping
     public ResponseEntity<StudyPlanDto> createPlan(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails, // 수정
             @Valid @RequestBody StudyPlanRequestDto request
     ) {
-        StudyPlanDto dto = planService.create(userId, request);
+        Long currentUserId = userDetails.getUserId();
+        StudyPlanDto dto = planService.create(currentUserId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @GetMapping
-    public ResponseEntity<List<StudyPlanDto>> listPlans(@RequestParam Long userId) {
-        return ResponseEntity.ok(planService.listByUser(userId));
+    public ResponseEntity<List<StudyPlanDto>> listPlans(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long currentUserId = userDetails.getUserId();
+        return ResponseEntity.ok(planService.listByUser(currentUserId));
     }
 
     @PutMapping("/{id}")

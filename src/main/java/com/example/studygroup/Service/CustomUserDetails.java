@@ -14,7 +14,7 @@ import java.util.Collections;
 public class CustomUserDetails implements UserDetails {
 
     private final Long userId;
-    private final String username; // Spring Security는 email을 username으로 사용
+    private final String username; // email을 username으로 사용
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
 
