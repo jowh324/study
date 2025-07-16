@@ -10,14 +10,16 @@ import com.example.studygroup.exception.UserNotFoundException;
 import com.example.studygroup.exception.exceptionhandler;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
-
-    public UserService(UserRepository userRepository) {
+    private final PasswordEncoder passwordEncoder;
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -27,10 +29,12 @@ public class UserService {
         }
 
 
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
         Users user = Users.builder()
                 .email(request.getEmail())
                 .name(request.getUsername())
-                .password(request.getPassword())
+                .password(encodedPassword) // 암호화된 비밀번호 저장
                 .build();
 
         userRepository.save(user);

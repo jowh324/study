@@ -18,6 +18,7 @@ import java.util.Set;
 @Entity
 @Table(name="users")
 @EntityListeners(AuditingEntityListener.class)
+
 public class Users {
     @Id
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
@@ -61,6 +62,26 @@ public class Users {
         this.updatedAt = updatedAt;
     }
 
+    public boolean isAccountNonExpired(){
+        // 만료되었는지 확인하는 로직
+        return true; // true -> 만료되지 않음
+    }
+
+    // 계정 잠금 여부 반환
+
+    public boolean isAccountNonLocked(){
+        return true; // true -> 잠금되지 않음
+    }
+
+    // 패스워드 만료 여부 반환
+
+    public boolean isCredentialsNonExpired(){
+        return true; // true -> 만료되지 않음
+    }
+
+    // 계정 사용 가능 여부 변환
+    public boolean isEnabled(){
+        return true;}
 
 
 }

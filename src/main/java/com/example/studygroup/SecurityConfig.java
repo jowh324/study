@@ -1,6 +1,7 @@
 package com.example.studygroup;
 
 import com.example.studygroup.Service.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,16 +12,22 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.security.config.Customizer.withDefaults;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
     private final PasswordEncoder passwordEncoder;
 
     public SecurityConfig(CustomUserDetailsService uds, PasswordEncoder pe) {
@@ -31,26 +38,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1) CSRF 비활성화
-                .csrf(csrf -> csrf.disable())
 
-                // 2) 인가 규칙
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/users/signup", "/api/users/login")
+            .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/api/users/signup", "/api/users/login").permitAll()  // 회원가입, 로그인은 허용
+                        .anyRequest().authenticated()  // 나머지는 인증 필요
+                )
+                .formLogin((form) -> form
+                        .loginPage("/api/users/login")  // 커스텀 로그인 페이지
+                        .defaultSuccessUrl("/home", true)
                         .permitAll()
-                        .anyRequest().authenticated()
                 )
-
-                // 3) HTTP Basic 로그인 방식 활성화
-                .httpBasic(Customizer.withDefaults())
-
-                // 4) 세션 정책 (STATeless)
-                .sessionManagement(sm -> sm
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-
-                // 5) DAO 인증 프로바이더 등록
-                .authenticationProvider(daoAuthenticationProvider());
+                .logout((logout) -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .permitAll()
+                );
 
         return http.build();
     }

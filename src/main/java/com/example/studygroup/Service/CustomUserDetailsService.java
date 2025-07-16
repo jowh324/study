@@ -29,4 +29,5 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .roles("USER")               // 필요에 따라 권한 설정
                 .build();
     }
+
 }

@@ -27,13 +27,8 @@ public class UserController {
         SignupResponseDto response = userService.register(request);
         return ResponseEntity.created(URI.create("/" + response.getId())).body(response);
     }
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(
-            @Validated @RequestBody LoginRequestDto request
-    ) {
-        LoginResponseDto response = userService.login(request);
-        return ResponseEntity.ok(response);
-    }
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);

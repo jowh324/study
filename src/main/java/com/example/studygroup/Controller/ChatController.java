@@ -34,7 +34,7 @@ public class ChatController {
         chatMessage.setTimestamp(Instant.now());
         return chatMessage;
     }
-    @MessageMapping("/chat.sendMessage")
+    @MessageMapping("/chat.sendPMessage")
     public void sedMessage(@Payload ChatMessage chatMessage) {chatMessage.setTimestamp(Instant.now());
     messagingTemplate.convertAndSendToUser(chatMessage.getSender(), "/queue/messages", chatMessage);
     }
