@@ -6,6 +6,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
 import java.time.Instant;
 
 @Controller
@@ -21,17 +22,12 @@ public class ChatController {
      * '/app/private.chat'으로 메시지를 받으면, 수신자의 개인 큐로 직접 메시지를 보냅니다.
      */
     @MessageMapping("/private.chat")
-    public void sendPrivateMessage(@Payload ChatMessage chatMessage) {
+    public void sendPrivateMessage(@Payload ChatMessage chatMessage, Principal principal) {
+        String senderEmail=principal.getName();
+        chatMessage.setSender(senderEmail);
         chatMessage.setTimestamp(Instant.now());
-
         // 수신자의 이메일을 기반으로, '/queue/messages/{이메일}' 형태의
         // 명확한 목적지로 메시지를 직접 보냅니다.
-        String destination = "/queue/messages/" + chatMessage.getReceiver();
-        System.out.println("==========================================");
-        System.out.println("메시지 수신 (from: " + chatMessage.getSender() + ")");
-        System.out.println("메시지 전송 (to: " + destination + ")");
-        System.out.println("내용: " + chatMessage.getContent());
-        System.out.println("==========================================");
-        messagingTemplate.convertAndSend(destination, chatMessage);
+        messagingTemplate.convertAndSendToUser(chatMessage.getReceiver(),"/queue/private-messages",chatMessage);
     }
 }

@@ -23,5 +23,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         // 클라이언트가 서버의 @MessageMapping 메서드를 호출할 때 사용할 접두사입니다.
         registry.setApplicationDestinationPrefixes("/app");
+        registry.setUserDestinationPrefix("/user");
     }
 }
