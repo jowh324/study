@@ -1,11 +1,8 @@
 package com.example.studygroup.Controller;
 
 import com.example.studygroup.ChatMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 
@@ -13,29 +10,28 @@ import java.time.Instant;
 
 @Controller
 public class ChatController {
-    @Autowired
-    private SimpMessageSendingOperations messagingTemplate;
-    // Handle messages sent to /app/chat.sendMessage
-    @MessageMapping("/chat.sendMessage")
-    @SendTo("/topic/public")
-    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-        chatMessage.setTimestamp(Instant.now());
-        return chatMessage;
+
+    private final SimpMessageSendingOperations messagingTemplate;
+
+    public ChatController(SimpMessageSendingOperations messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
     }
 
-
-    // Handle new user joining, messages sent to /app/chat.addUser
-    @MessageMapping("/chat.addUser")
-    @SendTo("/topic/public")
-    public ChatMessage addUser(@Payload ChatMessage chatMessage,
-                               SimpMessageHeaderAccessor headerAccessor) {
-        // Add username in WebSocket session attributes
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
+    /**
+     * '/app/private.chat'으로 메시지를 받으면, 수신자의 개인 큐로 직접 메시지를 보냅니다.
+     */
+    @MessageMapping("/private.chat")
+    public void sendPrivateMessage(@Payload ChatMessage chatMessage) {
         chatMessage.setTimestamp(Instant.now());
-        return chatMessage;
-    }
-    @MessageMapping("/chat.sendPMessage")
-    public void sedMessage(@Payload ChatMessage chatMessage) {chatMessage.setTimestamp(Instant.now());
-    messagingTemplate.convertAndSendToUser(chatMessage.getSender(), "/queue/messages", chatMessage);
+
+        // 수신자의 이메일을 기반으로, '/queue/messages/{이메일}' 형태의
+        // 명확한 목적지로 메시지를 직접 보냅니다.
+        String destination = "/queue/messages/" + chatMessage.getReceiver();
+        System.out.println("==========================================");
+        System.out.println("메시지 수신 (from: " + chatMessage.getSender() + ")");
+        System.out.println("메시지 전송 (to: " + destination + ")");
+        System.out.println("내용: " + chatMessage.getContent());
+        System.out.println("==========================================");
+        messagingTemplate.convertAndSend(destination, chatMessage);
     }
 }

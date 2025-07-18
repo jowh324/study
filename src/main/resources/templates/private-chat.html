@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>1:1 채팅 최종 테스트</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <style>
+    body { font-family: sans-serif; display: flex; padding: 20px; gap: 40px; }
+    .chat-client { border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: #fafafa; }
+    h2 { margin-top: 0; }
+    .chat-window { height: 250px; width: 350px; overflow-y: scroll; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; background: #fff; }
+    .message .sender { font-weight: bold; color: #007bff; }
+    .message .receiver { font-weight: bold; color: #28a745; }
+    .system { color: #888; font-style: italic; }
+  </style>
+</head>
+<body>
+<div class="chat-client">
+  <h2>사용자 1: jowh324@example.com</h2>
+  <div id="client1-chat" class="chat-window"></div>
+  <div>
+    <label>받는 사람:</label><input type="text" id="client1-receiver" value="testuser@example.com" style="width: 200px;"><br>
+    <label>메시지:</label><input type="text" id="client1-message" placeholder="메시지 입력..." style="width: 200px;"><br>
+    <button onclick="sendMessage(1)">전송</button>
+  </div>
+</div>
+<div class="chat-client">
+  <h2>사용자 2: testuser@example.com</h2>
+  <div id="client2-chat" class="chat-window"></div>
+  <div>
+    <label>받는 사람:</label><input type="text" id="client2-receiver" value="jowh324@example.com" style="width: 200px;"><br>
+    <label>메시지:</label><input type="text" id="client2-message" placeholder="메시지 입력..." style="width: 200px;"><br>
+    <button onclick="sendMessage(2)">전송</button>
+  </div>
+</div>
+
+<script>
+  const client1 = { userEmail: "jowh324@example.com", stompClient: null, windowId: "client1-chat", messageId: "client1-message", receiverId: "client1-receiver" };
+  const client2 = { userEmail: "testuser@example.com", stompClient: null, windowId: "client2-chat", messageId: "client2-message", receiverId: "client2-receiver" };
+
+  window.onload = () => { connect(client1); connect(client2); };
+
+  function connect(client) {
+    const socket = new WebSocket('ws://api.studyplan.p-e.kr/ws-chat');
+    client.stompClient = Stomp.over(socket);
+
+    client.stompClient.connect({}, (frame) => {
+      displayMessage(client, `<strong class="system">[SYSTEM]</strong> 서버 연결 성공!`);
+
+      // 1. 자신의 고유한 주소를 구독합니다.
+      const destination = `/queue/messages/${client.userEmail}`;
+      client.stompClient.subscribe(destination, (message) => {
+        const chat = JSON.parse(message.body);
+        displayMessage(client, `<span class="sender">${chat.sender}</span>: ${chat.content}`);
+      });
+      displayMessage(client, `<strong class="system">구독 시작: ${destination}</strong>`);
+
+    }, (error) => {
+      displayMessage(client, `<strong class="system">[SYSTEM]</strong> 연결 실패: ${error}`);
+    });
+  }
+
+  function sendMessage(clientNumber) {
+    const client = clientNumber === 1 ? client1 : client2;
+    const receiver = document.getElementById(client.receiverId).value.trim();
+    const content = document.getElementById(client.messageId).value.trim();
+
+    if (content && receiver && client.stompClient) {
+      const chatMessage = {
+        sender: client.userEmail,
+        receiver: receiver,
+        content: content,
+        type: 'CHAT'
+      };
+
+      // 2. '/app/private.chat'으로 메시지를 보냅니다.
+      client.stompClient.send("/app/private.chat", {}, JSON.stringify(chatMessage));
+
+      displayMessage(client, `<span class="receiver">To ${receiver}</span>: ${content}`);
+      document.getElementById(client.messageId).value = '';
+    }
+  }
+
+  function displayMessage(client, htmlContent) {
+    const chatWindow = document.getElementById(client.windowId);
+    const messageElement = document.createElement('p');
+    messageElement.style.margin = '5px 0';
+    messageElement.innerHTML = htmlContent;
+    chatWindow.appendChild(messageElement);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+</script>
+</body>
+</html>
