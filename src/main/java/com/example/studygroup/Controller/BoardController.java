@@ -4,7 +4,6 @@ import com.example.studygroup.DTO.BoardDto;
 import com.example.studygroup.DTO.BoardRequestDto;
 import com.example.studygroup.Service.BoardService;
 import com.example.studygroup.Service.CustomUserDetails;
-import com.example.studygroup.Service.CustomUserDetailsService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

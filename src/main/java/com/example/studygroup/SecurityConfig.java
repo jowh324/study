@@ -38,9 +38,9 @@ public class SecurityConfig {
 
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((auth) -> auth
-                        // 회원가입과 로그인은 인증 없이 접근 허용
+                        // 웹소켓 연결 경로 및 SockJS 관련 경로 허용
+                        .requestMatchers("/ws-chat/**").permitAll()
                         .requestMatchers("/api/users/signup", "/api/users/login").permitAll()
-                        // 나머지 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
@@ -49,10 +49,7 @@ public class SecurityConfig {
                         // 로그인 ID로 사용할 파라미터 이름
                         .usernameParameter("email")
                         // 로그인 성공 시 핸들러
-                        .successHandler((request, response, authentication) -> {
-                            response.setStatus(200);
-                            response.getWriter().write("Login Successful");
-                        })
+                        .defaultSuccessUrl("/api/boards", true)
                         // 로그인 실패 시 핸들러
                         .failureHandler((request, response, exception) -> {
                             response.setStatus(401);

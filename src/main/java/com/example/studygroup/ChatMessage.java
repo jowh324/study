@@ -17,8 +17,9 @@ public class ChatMessage {
         return receiver;
     }
     public void setReceiver(){this.receiver=receiver;}
-    public void setReceiver(String receiver) {}
-    public MessageType getType() { return type; }
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
+    }    public MessageType getType() { return type; }
     public void setType(MessageType type) { this.type = type; }
     public String getSender() { return sender; }
     public void setSender(String sender) { this.sender = sender; }
