@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f8;
+        }
+        .signup-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 350px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* 패딩과 테두리가 너비에 포함되도록 설정 */
+        }
+        .btn-signup {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .btn-signup:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .message.success {
+            color: green;
+        }
+        .message.error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="signup-container">
+    <h2>회원가입</h2>
+    <form id="signup-form">
+        <div class="form-group">
+            <label for="email">이메일</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="username">사용자 이름</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn-signup">가입하기</button>
+    </form>
+    <div id="message" class="message"></div>
+</div>
+
+<script>
+    document.getElementById('signup-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // 폼의 기본 제출 동작을 막습니다.
+
+        const form = event.target;
+        const email = form.email.value;
+        const username = form.username.value;
+        const password = form.password.value;
+        const messageDiv = document.getElementById('message');
+
+        const signupData = {
+            email: email,
+            username: username,
+            password: password
+        };
+
+        fetch('/api/users/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(signupData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    // 회원가입 성공
+                    messageDiv.textContent = '회원가입에 성공했습니다!';
+                    messageDiv.className = 'message success';
+                    form.reset(); // 폼 초기화
+                    return response.json();
+                } else {
+                    // 회원가입 실패
+                    return response.text().then(text => { throw new Error(text) });
+                }
+            })
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                messageDiv.textContent = '회원가입 중 오류가 발생했습니다: ' + error.message;
+                messageDiv.className = 'message error';
+            });
+    });
+</script>
+
+</body>
+</html>

@@ -90,7 +90,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // 모든 출처 허용
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://api.studyplan.p-e.kr"));
+        // 모든 출처 허용 x
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 허용할 HTTP 메서드
         configuration.setAllowedHeaders(Arrays.asList("*")); // 허용할 HTTP 헤더
         configuration.setAllowCredentials(true);

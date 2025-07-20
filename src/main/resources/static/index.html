@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>스터디 그룹 대시보드</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 20px; }
+    .container { max-width: 1200px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    h1, h2 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    h2 { font-size: 1.5em; margin-top: 30px; }
+    nav { background: #333; padding: 10px; text-align: center; margin-bottom: 20px; }
+    nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .card { padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="number"], textarea, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+    button:hover { background-color: #0056b3; }
+    button.delete-btn { background-color: #dc3545; }
+    button.delete-btn:hover { background-color: #c82333; }
+    #login-section, #dashboard-section { padding: 20px; border: 1px solid #eee; margin-top: 20px; }
+    #dashboard-section { display: none; }
+    .item-list { list-style-type: none; padding: 0; }
+    .item-list li { background: #f9f9f9; padding: 10px; margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📚 스터디 그룹 프로젝트 대시보드</h1>
+  <nav>
+    <a href="/signup.html" target="_blank">회원가입</a>
+    <a href="/private-chat.html" target="_blank">1:1 채팅</a>
+  </nav>
+
+  <div id="login-section">
+    <h2>로그인 및 계정 관리</h2>
+    <form id="login-form">
+      <div class="form-group">
+        <label for="login-email">이메일:</label>
+        <input type="email" id="login-email" required>
+      </div>
+      <div class="form-group">
+        <label for="login-password">비밀번호:</label>
+        <input type="password" id="login-password" required>
+      </div>
+      <button type="submit">로그인</button>
+      <button type="button" id="logout-btn" style="display:none; background-color: #6c757d;">로그아웃</button>
+      <button type="button" id="delete-me-btn" class="delete-btn" style="display:none; margin-left: 10px;">회원 탈퇴</button>
+    </form>
+    <p id="auth-status">로그인 상태: 로그아웃됨</p>
+  </div>
+
+  <div id="dashboard-section">
+    <hr>
+    <div class="card">
+      <h2>게시판 관리 (BoardController)</h2>
+      <form id="board-create-form">
+        <input type="text" id="board-title" placeholder="제목" required><br><br>
+        <textarea id="board-content" placeholder="내용" required></textarea><br><br>
+        <input type="text" id="board-category" placeholder="카테고리 이름" required><br><br>
+        <select id="board-status">
+          <option value="RECRUITING">모집중</option>
+          <option value="COMPLETED">모집완료</option>
+        </select><br><br>
+        <button type="submit">새 게시글 작성</button>
+      </form>
+      <h3>게시글 목록</h3>
+      <ul id="board-list" class="item-list"></ul>
+    </div>
+
+    <div class="card">
+      <h2>스터디 플랜 관리 (StudyPlanController)</h2>
+      <form id="plan-create-form">
+        <input type="text" id="plan-title" placeholder="계획 제목" required><br><br>
+        <textarea id="plan-description" placeholder="상세 내용"></textarea><br><br>
+        <label>시작일:</label><input type="date" id="plan-start-date" required><br><br>
+        <label>종료일:</label><input type="date" id="plan-end-date" required><br><br>
+        <label>완료 여부:</label><input type="checkbox" id="plan-is-complete"><br><br>
+        <button type="submit">새 계획 추가</button>
+      </form>
+      <h3>내 스터디 플랜</h3>
+      <ul id="plan-list" class="item-list"></ul>
+    </div>
+
+    <div class="card">
+      <h2>카테고리 관리 (CategoryController)</h2>
+      <form id="category-create-form">
+        <input type="text" id="category-name" placeholder="새 카테고리 이름" required>
+        <button type="submit">카테고리 추가</button>
+      </form>
+      <h3>카테고리 목록</h3>
+      <ul id="category-list" class="item-list"></ul>
+    </div>
+
+    <div class="card">
+      <h2>팔로우 관리 (FollowController)</h2>
+      <form id="follow-form">
+        <input type="number" id="followee-id" placeholder="팔로우할 사용자의 ID" required>
+        <button type="submit">팔로우</button>
+      </form>
+      <form id="unfollow-form" style="margin-top:10px;">
+        <input type="number" id="unfollowee-id" placeholder="언팔로우할 사용자의 ID" required>
+        <button type="submit" class="delete-btn">언팔로우</button>
+      </form>
+      <br>
+      <button onclick="fetchFollowers()">내 팔로워 보기</button>
+      <button onclick="fetchFollowing()">내가 팔로잉하는 사용자 보기</button>
+      <h3>팔로워</h3>
+      <ul id="follower-list" class="item-list"></ul>
+      <h3>팔로잉</h3>
+      <ul id="following-list" class="item-list"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 전역 변수
+  const apiBaseUrl = ''; // 동일 출처이므로 전체 URL 생략 가능
+
+  // 유틸리티 함수
+  const fetchAPI = async (url, options = {}) => {
+    options.headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+
+    const response = await fetch(apiBaseUrl + url, options);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+    if (response.status === 204) {
+      return null;
+    }
+    return response.json();
+  };
+
+  // --- 인증 관련 ---
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const authStatus = document.getElementById('auth-status');
+    const details = new URLSearchParams();
+    details.append('email', email);
+    details.append('password', password);
+
+    try {
+      const response = await fetch('/api/users/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: details
+      });
+
+      if (response.ok) {
+        authStatus.textContent = `로그인 상태: ${email}`;
+        authStatus.style.color = 'green';
+        document.getElementById('dashboard-section').style.display = 'block';
+        document.getElementById('logout-btn').style.display = 'inline-block';
+        document.getElementById('delete-me-btn').style.display = 'inline-block'; // 탈퇴 버튼 표시
+        fetchAllData();
+      } else {
+        throw new Error(await response.text() || '로그인 실패');
+      }
+    } catch (error) {
+      authStatus.textContent = `로그인 오류: ${error.message}`;
+      authStatus.style.color = 'red';
+    }
+  });
+
+  const handleLogout = () => {
+    document.getElementById('auth-status').textContent = '로그인 상태: 로그아웃됨';
+    document.getElementById('auth-status').style.color = 'black';
+    document.getElementById('dashboard-section').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'none';
+    document.getElementById('delete-me-btn').style.display = 'none'; // 탈퇴 버튼 숨김
+    document.getElementById('login-form').reset();
+  };
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await fetch('/api/users/logout', { method: 'POST' });
+    handleLogout();
+  });
+
+  // 회원 탈퇴 스크립트 추가
+  document.getElementById('delete-me-btn').addEventListener('click', async () => {
+    if (confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      try {
+        await fetchAPI('/api/users/me', { method: 'DELETE' });
+        alert('회원 탈퇴가 성공적으로 처리되었습니다.');
+        handleLogout(); // UI를 로그아웃 상태로 변경
+      } catch (error) {
+        alert(`회원 탈퇴 실패: ${error.message}`);
+      }
+    }
+  });
+
+
+  // --- 데이터 로드 ---
+  function fetchAllData() {
+    fetchBoards();
+    fetchCategories();
+    fetchStudyPlans();
+    fetchFollowers();
+    fetchFollowing();
+  }
+
+  async function fetchBoards() {
+    try {
+      const boards = await fetchAPI('/api/boards');
+      const list = document.getElementById('board-list');
+      list.innerHTML = '';
+      boards.forEach(b => {
+        const item = document.createElement('li');
+        item.innerHTML = `<span><strong>${b.title}</strong> by ${b.username} <i>(${b.category})</i></span>
+                              <button class="delete-btn" onclick="deleteBoard(${b.id})">삭제</button>`;
+        list.appendChild(item);
+      });
+    } catch (error) { console.error('게시글 로드 실패:', error); }
+  }
+
+  async function fetchCategories() {
+    try {
+      const categories = await fetchAPI('/api/categories');
+      const list = document.getElementById('category-list');
+      list.innerHTML = '';
+      categories.forEach(c => {
+        const item = document.createElement('li');
+        item.innerHTML = `<span>${c.name} (ID: ${c.id})</span>
+                              <button class="delete-btn" onclick="deleteCategory(${c.id})">삭제</button>`;
+        list.appendChild(item);
+      });
+    } catch (error) { console.error('카테고리 로드 실패:', error); }
+  }
+
+  async function fetchStudyPlans() {
+    try {
+      const plans = await fetchAPI('/api/studyplans');
+      const list = document.getElementById('plan-list');
+      list.innerHTML = '';
+      plans.forEach(p => {
+        const item = document.createElement('li');
+        item.innerHTML = `<span><strong>${p.title}</strong> (${p.startDate} ~ ${p.endDate}) - ${p.isComplete ? '완료' : '진행중'}</span>
+                              <button class="delete-btn" onclick="deletePlan(${p.id})">삭제</button>`;
+        list.appendChild(item);
+      });
+    } catch (error) { console.error('스터디 계획 로드 실패:', error); }
+  }
+
+  async function fetchFollowers() {
+    try {
+      const followers = await fetchAPI('/api/follows/followers');
+      const list = document.getElementById('follower-list');
+      list.innerHTML = '';
+      followers.forEach(f => {
+        const item = document.createElement('li');
+        item.textContent = `${f.followerUsername} 님이 팔로우합니다.`;
+        list.appendChild(item);
+      });
+    } catch (error) { console.error('팔로워 로드 실패:', error); }
+  }
+
+  async function fetchFollowing() {
+    try {
+      const followings = await fetchAPI('/api/follows/following');
+      const list = document.getElementById('following-list');
+      list.innerHTML = '';
+      followings.forEach(f => {
+        const item = document.createElement('li');
+        item.textContent = `내가 ${f.followeeUsername} 님을 팔로우합니다.`;
+        list.appendChild(item);
+      });
+    } catch (error) { console.error('팔로잉 로드 실패:', error); }
+  }
+
+  // --- 데이터 생성/삭제 ---
+
+  // 게시판
+  document.getElementById('board-create-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      title: document.getElementById('board-title').value,
+      content: document.getElementById('board-content').value,
+      category: document.getElementById('board-category').value,
+      status: document.getElementById('board-status').value,
+    };
+    try {
+      await fetchAPI('/api/boards', { method: 'POST', body: JSON.stringify(data) });
+      fetchBoards();
+      e.target.reset();
+    } catch (error) { alert(`게시글 생성 실패: ${error.message}`); }
+  });
+
+  async function deleteBoard(id) {
+    if (confirm(`게시글 ID ${id}를 삭제하시겠습니까?`)) {
+      try {
+        await fetchAPI(`/api/boards/${id}`, { method: 'DELETE' });
+        fetchBoards();
+      } catch (error) { alert(`게시글 삭제 실패: ${error.message}`); }
+    }
+  }
+
+  // 카테고리
+  document.getElementById('category-create-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = { name: document.getElementById('category-name').value };
+    try {
+      await fetchAPI('/api/categories', { method: 'POST', body: JSON.stringify(data) });
+      fetchCategories();
+      e.target.reset();
+    } catch (error) { alert(`카테고리 생성 실패: ${error.message}`); }
+  });
+
+  async function deleteCategory(id) {
+    if (confirm(`카테고리 ID ${id}를 삭제하시겠습니까?`)) {
+      try {
+        await fetchAPI(`/api/categories/${id}`, { method: 'DELETE' });
+        fetchCategories();
+        fetchBoards();
+      } catch (error) { alert(`카테고리 삭제 실패: ${error.message}`); }
+    }
+  }
+
+  // 스터디 플랜
+  document.getElementById('plan-create-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      title: document.getElementById('plan-title').value,
+      description: document.getElementById('plan-description').value,
+      startDate: document.getElementById('plan-start-date').value,
+      endDate: document.getElementById('plan-end-date').value,
+      isComplete: document.getElementById('plan-is-complete').checked,
+    };
+    try {
+      await fetchAPI('/api/studyplans', { method: 'POST', body: JSON.stringify(data) });
+      fetchStudyPlans();
+      e.target.reset();
+    } catch (error) { alert(`계획 생성 실패: ${error.message}`); }
+  });
+
+  async function deletePlan(id) {
+    if (confirm(`계획 ID ${id}를 삭제하시겠습니까?`)) {
+      try {
+        await fetchAPI(`/api/studyplans/${id}`, { method: 'DELETE' });
+        fetchStudyPlans();
+      } catch (error) { alert(`계획 삭제 실패: ${error.message}`); }
+    }
+  }
+
+  // 팔로우
+  document.getElementById('follow-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = { followeeId: parseInt(document.getElementById('followee-id').value) };
+    try {
+      await fetchAPI('/api/follows', { method: 'POST', body: JSON.stringify(data) });
+      fetchFollowers();
+      fetchFollowing();
+      e.target.reset();
+    } catch (error) { alert(`팔로우 실패: ${error.message}`); }
+  });
+
+  document.getElementById('unfollow-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = { followeeId: parseInt(document.getElementById('unfollowee-id').value) };
+    try {
+      await fetchAPI('/api/follows', { method: 'DELETE', body: JSON.stringify(data) });
+      fetchFollowers();
+      fetchFollowing();
+      e.target.reset();
+    } catch (error) { alert(`언팔로우 실패: ${error.message}`); }
+  });
+
+</script>
+
+</body>
+</html>
