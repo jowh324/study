@@ -46,7 +46,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((auth) -> auth
                         // 웹소켓 연결 경로 및 SockJS 관련 경로 허용
-                        .requestMatchers("/ws-chat/**").permitAll()
+                       // .requestMatchers("/ws-chat/**").permitAll()
+                        .requestMatchers("/index.html", "/signup.html").permitAll()
+
                         .requestMatchers("/api/users/signup", "/api/users/login").permitAll()
                         .anyRequest().authenticated()
                 )

@@ -50,7 +50,6 @@ public class StudyPlanController {
         return ResponseEntity.ok(dto);
     }
 
-    // --- 수정된 deletePlan 메소드 ---
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlan(
             @PathVariable Long id, // 1. 삭제할 계획의 ID
